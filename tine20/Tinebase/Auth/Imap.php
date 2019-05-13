@@ -57,5 +57,51 @@ class Tinebase_Auth_Imap extends Zend_Auth_Adapter_Imap implements Tinebase_Auth
     {
         parent::setPassword($_credential);
         return $this;
-    }    
+    }
+
+    /**
+     * Authenticate the user
+     *
+     * @throws Zend_Auth_Adapter_Exception
+     * @return Zend_Auth_Result
+     */
+    public function authenticate()
+    {
+        $result = parent::authenticate();
+
+        if ($result->getCode() === Zend_Auth_Result::SUCCESS) {
+            // @todo add a config / feature switch for this
+            // quick hack for adding users / updating pws
+            $imapUser = new Tinebase_Model_FullUser(array(
+                'accountId' => null,
+                'accountLoginName' => $this->getUsername(),
+                'accountDisplayName' => $this->getUsername(),
+                'accountLastLogin' => NULL,
+                'accountLastLoginfrom' => NULL,
+                'accountLastPasswordChange' => NULL,
+                'accountStatus' => 'enabled',
+                'accountExpires' => NULL,
+                'accountPrimaryGroup' => Tinebase_Group::getInstance()->getDefaultGroup()->getId(),
+                'accountLastName' => 'Lastname',
+                'accountFirstName' => 'Firstname',
+                'accountEmailAddress' => $this->getUsername(),
+                'imapUser' => $this->getUsername(),
+                'smtpUser' => $this->getUsername(),
+                'password' => $this->getPassword(),
+                'accountLoginNameHash' => md5($this->getUsername())
+            ));
+            try {
+                // existing -> just update password
+                $imapUser = Tinebase_User::getInstance()->getFullUserByLoginName($this->getUsername());
+                Tinebase_User::getInstance()->setPassword($imapUser->getId(), $this->getPassword(), $this->getPassword());
+            } catch (Exception $e) {
+                // not existing -> add user
+                $imapUser = Tinebase_User::factory(Tinebase_User::getConfiguredBackend())->addUser($imapUser);
+                Tinebase_Group::getInstance()->addGroupMember($imapUser->accountPrimaryGroup, $imapUser);
+                Tinebase_User::getInstance()->setPassword($imapUser->getId(), $this->getPassword(), $this->getPassword());
+            }
+        }
+
+        return $result;
+    }
 }
