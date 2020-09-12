@@ -29,7 +29,7 @@ class Calendar_Convert_Event_VCalendar_GenericTest extends PHPUnit_Framework_Tes
      * @var Calendar_Convert_Event_VCalendar_Abstract
      */
     protected $_converter = null;
-    
+
     /**
      * Sets up the fixture.
      * This method is called before a test is executed.
@@ -754,6 +754,17 @@ class Calendar_Convert_Event_VCalendar_GenericTest extends PHPUnit_Framework_Tes
         $savedEvent = $this->_saveIcsEvent('attender_empty_name.ics', Calendar_Convert_Event_VCalendar_Factory::CLIENT_MACOSX);
         
         $this->assertEquals('Telko axel', $savedEvent->summary);
+    }
+
+    /**
+     * testOwnCloud
+     *
+     * @see https://github.com/tine20/tine20/issues/5410
+     */
+    public function testOwnCloud()
+    {
+        $savedEvent = $this->_saveIcsEvent('owncloud.ics', Calendar_Convert_Event_VCalendar_Factory::CLIENT_GENERIC);
+        print_r($savedEvent->toArray());
     }
 
     /**
