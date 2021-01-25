@@ -1,0 +1,50 @@
+# TODO build in lxd
+# TODO split into multiple snaps (tine20-core, tine20-webstack, ...)?
+
+name: tine20 # you probably want to 'snapcraft register <name>'
+# TODO use "git describe" to set this by script
+version: '0.1' # just for humans, typically '1.2+git' or '1.3.2'
+summary: Tine 2.0 Groupware # 79 char long summary
+# TODO set description
+description: |
+  This is my-snap's description. You have a paragraph or two to tell the
+  most important story about your snap. Keep it under 100 words though,
+  we live in tweetspace and your description wants to look good in the snap
+  store.
+
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: devmode # use 'strict' once you have the right plugs and slots
+
+parts:
+  tine20:
+    # TODO could use the build source package instead (and skip build here)
+    source: ./tine20
+    plugin: nodejs
+    build-packages:
+      - php
+      - php-zip
+      - composer
+      - gettext
+    node-engine: 7.9.0
+    node-packages:
+      - webpack
+    prepare: |
+      composer install --ignore-platform-reqs
+    build: |
+      vendor/bin/phing
+      # TODO remove unused files here
+      cp -ar * ../install
+    # TODO maybe this can be simplified!
+    organize:
+      '*': htdocs/
+    stage:
+      - htdocs
+    prime:
+      - htdocs
+
+# see (for example) https://github.com/nextcloud/nextcloud-snap/blob/master/snap/snapcraft.yaml
+# TODO add php-fpm to snap
+# TODO add webserver to snap
+# TODO add mysql to snap
+# TODO install/update tine in snap
+# TODO maybe use "content" (https://snapcraft.io/docs/reference/interfaces) to access tine20 source snap in "allinone" snap
