@@ -123,7 +123,7 @@
     "webpack-conditional-loader": "^1.0.12",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^4.2.2",
-    "xmldom": "^0.1.31"
+    "xmldom": "^0.5.0"
   },
   "optionalDependencies": {}
 }
